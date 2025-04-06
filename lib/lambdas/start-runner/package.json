@@ -1,0 +1,17 @@
+{
+    "name": "start-runner",
+    "version": "1.0.0",
+    "main": "index.ts",
+    "dependencies": {
+        "@aws-sdk/client-codebuild": "^3.x",
+        "@aws-sdk/client-secrets-manager": "^3.x",
+        "@octokit/auth-app": "^4.x",
+        "@octokit/core": "^5.x",
+        "@octokit/rest": "^20.x",
+        "octokit": "^4.1.2"
+    },
+    "devDependencies": {
+        "@types/aws-lambda": "^8.x",
+        "typescript": "^5.x"
+    }
+}

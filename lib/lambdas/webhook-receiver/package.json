@@ -1,0 +1,12 @@
+{
+    "name": "webhook-receiver",
+    "version": "1.0.0",
+    "main": "index.ts",
+    "dependencies": {
+      "@aws-sdk/client-sqs": "^3.x"
+    },
+    "devDependencies": {
+      "@types/aws-lambda": "^8.x",
+      "typescript": "^5.x"
+    }
+  }
