@@ -59,16 +59,28 @@ export class GhRunnerOnAwsStack extends cdk.Stack {
           install: {
             commands: [
               'echo Installing GitHub Actions Runner...',
-              'mkdir actions-runner && cd actions-runner',
-              'curl -O -L https://github.com/actions/runner/releases/download/v2.316.0/actions-runner-linux-x64-2.316.0.tar.gz',
-              'tar xzf ./actions-runner-linux-x64-2.316.0.tar.gz',
-              'chmod +x ./config.sh ./run.sh'
+              'mkdir actions-runner',
+              'curl -o actions-runner/runner.tar.gz -L https://github.com/actions/runner/releases/download/v2.316.0/actions-runner-linux-x64-2.316.0.tar.gz',
+              'tar xzf actions-runner/runner.tar.gz -C actions-runner',
+              'chmod +x actions-runner/config.sh actions-runner/run.sh',
+              
+              'echo Creating runner-user...',
+              'useradd -m runner-user',                             
+              'groupadd docker || true',                            
+              'usermod -aG docker runner-user',                     
+              
+              'chown -R runner-user:docker actions-runner',
+              'chmod -R g+rw actions-runner',              
+              
+              'chown root:docker /var/run/docker.sock || true',      
+              'chmod 666 /var/run/docker.sock || true'            
             ]
           },
           build: {
             commands: [
-              './config.sh --url https://github.com/${OWNER}/${REPO} --token ${JIT_TOKEN} --labels codebuild-runner --unattended',
-              './run.sh'
+              'echo Configuring runner...',
+              'su runner-user -c "cd actions-runner && ./config.sh --url https://github.com/$OWNER/$REPO --token $JIT_TOKEN --labels codebuild-runner --unattended --ephemeral"',
+              'su runner-user -c "cd actions-runner && ./run.sh"'
             ]
           }
         }

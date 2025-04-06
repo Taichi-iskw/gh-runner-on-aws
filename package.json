@@ -11,10 +11,10 @@
     "synth": "cdk synth"
   },
   "devDependencies": {
+    "@types/node": "^20.x",
     "aws-cdk-lib": "^2.x",
     "constructs": "^10.x",
     "esbuild": "^0.19.0",
-    "typescript": "^5.x",
-    "@types/node": "^20.x"
+    "typescript": "^5.x"
   }
 }
