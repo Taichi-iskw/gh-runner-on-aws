@@ -9,6 +9,7 @@ import * as eventSources from 'aws-cdk-lib/aws-lambda-event-sources';
 import * as path from 'path';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'; 
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
+import { createRunnerProject } from './codebuild-runner';
 
 export class GhRunnerOnAwsStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -48,44 +49,7 @@ export class GhRunnerOnAwsStack extends cdk.Stack {
     api.root.addMethod('POST', webhookIntegration);
 
     // CodeBuild Project (Runner用)
-    const runnerProject = new codebuild.Project(this, 'GitHubActionsRunnerProject', {
-      environment: {
-        buildImage: codebuild.LinuxBuildImage.STANDARD_7_0,
-        privileged: true,
-      },
-      buildSpec: codebuild.BuildSpec.fromObject({
-        version: '0.2',
-        phases: {
-          install: {
-            commands: [
-              'echo Installing GitHub Actions Runner...',
-              'mkdir actions-runner',
-              'curl -o actions-runner/runner.tar.gz -L https://github.com/actions/runner/releases/download/v2.316.0/actions-runner-linux-x64-2.316.0.tar.gz',
-              'tar xzf actions-runner/runner.tar.gz -C actions-runner',
-              'chmod +x actions-runner/config.sh actions-runner/run.sh',
-              
-              'echo Creating runner-user...',
-              'useradd -m runner-user',                             
-              'groupadd docker || true',                            
-              'usermod -aG docker runner-user',                     
-              
-              'chown -R runner-user:docker actions-runner',
-              'chmod -R g+rw actions-runner',              
-              
-              'chown root:docker /var/run/docker.sock || true',      
-              'chmod 666 /var/run/docker.sock || true'            
-            ]
-          },
-          build: {
-            commands: [
-              'echo Configuring runner...',
-              'su runner-user -c "cd actions-runner && ./config.sh --url https://github.com/$OWNER/$REPO --token $JIT_TOKEN --labels codebuild-runner --unattended --ephemeral"',
-              'su runner-user -c "cd actions-runner && ./run.sh"'
-            ]
-          }
-        }
-      }),
-    });
+    const runnerProject = createRunnerProject(this, 'GitHubActionsRunnerProject');
 
     // Lambda2: SQS → GitHub JITトークン取得 → CodeBuild起動
     const startRunnerLambda = new NodejsFunction(this, 'StartRunnerLambda', {
