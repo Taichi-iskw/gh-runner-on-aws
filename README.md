@@ -2,60 +2,56 @@
 
 ![alt text](image.png)
 
-このプロジェクトは、GitHub ActionsのセルフホストランナーをAWS上で動作させるためのソリューションです。  
-CodeBuildを使用してランナーを動的に起動し、ジョブごとにランナーを作成することで、効率的かつスケーラブルな実行環境を提供します。
+A serverless solution to run GitHub Actions self-hosted runners on AWS, using **CodeBuild**, **Lambda**, and **GitHub App**.  
 
-## 特徴
+---
 
-- **動的ランナー生成**: CodeBuildを使用してジョブごとにランナーを生成。
-- **GitHub App連携**: Secrets Managerを使用してGitHub Appの認証情報を安全に管理。
-- **イベント駆動型アーキテクチャ**: LambdaとSQSを使用して非同期処理を実現。
+## ✨ Features
 
-## セットアップ
+- 🧩 **Ephemeral Runner per Job**: Each GitHub job triggers a new CodeBuild runner  
+- 🔐 **Secure GitHub App Auth**: App credentials stored in AWS Secrets Manager  
+- ⚙️ **Event-Driven Architecture**: Triggered via GitHub Webhook → Lambda → SQS → CodeBuild
 
-### 前提条件
+---
 
-- Node.js (v16以上)
+## 🚀 Getting Started
+
+### Requirements
+
+- Node.js (v16+)
 - AWS CLI
-- AWSアカウント
-- CDK (AWS Cloud Development Kit)
+- AWS Account
+- AWS CDK
 
-### 手順
+### Setup
 
-1. **依存関係のインストール**
+1. **Install dependencies**
 
    ```bash
    npm install
    ```
+2. Create a GitHub App
+- Create an App on GitHub
+- Set required permissions
+- Download private key, note App ID
 
-2. **GitHub Appの作成**
-
-   - GitHubで新しいGitHub Appを作成します。
-   - 必要な権限を設定し、App IDとプライベートキーを取得します。
-
-3. **Secrets Managerに認証情報をアップロード**
-
-   プライベートキーとApp IDをSecrets Managerにアップロードします。
-
+3. Store credentials in Secrets Manager
    ```bash
-   ./upload-github-app-secret.sh <secret-name> <path-to-private-key-pem> <github-app-id>
+   ./upload-github-app-secret.sh <secret-name> <path-to-key.pem> <app-id>
    ```
 
-4. **デプロイ**
-
-   CDKを使用してスタックをデプロイします。
-
+4. Deploy CDK stack
    ```bash
    npm run build
    cdk deploy
    ```
 
-## 使用方法
+## 🛠 Usage
+- Configure GitHub Webhook to your API Gateway endpoint
+- Use runs-on: [self-hosted] in your GitHub Actions workflows
+- Lambda receives the event, triggers a short-lived runner via CodeBuild
 
-1. GitHubリポジトリにWebhookを設定し、API Gatewayのエンドポイントを指定します。
-2. GitHub Actionsのジョブで`self-hosted`ラベルを指定します。
-3. ジョブがキューに追加されると、CodeBuildがランナーを起動し、ジョブを実行します。
+## 📄 License
+This project is licensed under the MIT License.
 
-## ライセンス
-
-このプロジェクトはMITライセンスの下で提供されています。
+---
